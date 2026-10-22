@@ -1,0 +1,360 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marketplace | Shop Everything</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<header class="site-header">
+    <a class="brand" href="{{ url_for('home') }}">
+        Marketplace<span>.</span>
+    </a>
+
+    <nav class="nav-links" aria-label="Main navigation">
+        <a class="nav-link active" href="{{ url_for('home') }}">Home</a>
+        <a class="nav-link" href="#categories">Categories</a>
+        <a class="nav-link" href="#products">Products</a>
+    </nav>
+
+    <form class="nav-search" action="{{ url_for('home') }}" method="get">
+        <span aria-hidden="true">⌕</span>
+        <input type="search"
+               name="q"
+               value="{{ search }}"
+               placeholder="Search products..."
+               aria-label="Search products">
+
+        {% if selected_category %}
+            <input type="hidden"
+                   name="category"
+                   value="{{ selected_category }}">
+        {% endif %}
+
+        <button type="submit">Search</button>
+    </form>
+
+    <div class="nav-actions">
+        {% if session.get('user_id') %}
+            <a class="account-link" href="{{ url_for('home') }}">
+                My account
+            </a>
+        {% else %}
+            <a class="account-link" href="{{ url_for('login') }}">
+                Sign in
+            </a>
+        {% endif %}
+
+        <a class="cart-link" href="{{ url_for('cart') }}">
+            <span aria-hidden="true">🛒</span>
+            Cart
+            <span class="cart-count" id="cart-count">
+                {{ session.get('cart', {}).values() | sum }}
+            </span>
+        </a>
+    </div>
+</header>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <div class="flash-stack">
+            {% for category, message in messages %}
+                <div class="flash-message {{ category }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endwith %}
+
+<!-- HERO SECTION -->
+<section class="hero-section">
+    <div class="hero-copy">
+        <span class="eyebrow">YOUR EVERYDAY MARKETPLACE</span>
+
+        <h1>
+            Find your next<br>
+            <span>favourite thing.</span>
+        </h1>
+
+        <p>
+            Discover great picks across your favourite categories,
+            all in one place.
+        </p>
+
+        <a class="hero-button" href="#products">
+            Explore products <span>→</span>
+        </a>
+
+        <div class="hero-proof">
+            <span class="proof-icon">✓</span>
+            Easy shopping <span>·</span>
+            Great choices <span>·</span>
+            Secure checkout
+        </div>
+    </div>
+
+    <div class="hero-art" aria-hidden="true">
+        <div class="hero-orbit orbit-one"></div>
+        <div class="hero-orbit orbit-two"></div>
+
+        <div class="hero-bag">🛍️</div>
+
+        <div class="floating-card floating-card-top">
+            <span>✨</span>
+            <div>
+                <strong>Good finds</strong>
+                <small>Just for you</small>
+            </div>
+        </div>
+
+        <div class="floating-card floating-card-bottom">
+            <span>💙</span>
+            <div>
+                <strong>Happy shopping</strong>
+                <small>All in one place</small>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- BENEFITS -->
+<section class="benefit-strip">
+    <div class="benefit-item">
+        <span class="benefit-icon">📦</span>
+        <div>
+            <strong>Plenty to explore</strong>
+            <small>Products for every need</small>
+        </div>
+    </div>
+
+    <div class="benefit-item">
+        <span class="benefit-icon">🔎</span>
+        <div>
+            <strong>Find it faster</strong>
+            <small>Search and filter easily</small>
+        </div>
+    </div>
+
+    <div class="benefit-item">
+        <span class="benefit-icon">🛒</span>
+        <div>
+            <strong>Simple checkout</strong>
+            <small>Your picks, all together</small>
+        </div>
+    </div>
+</section>
+
+<main class="main-content">
+
+    <!-- CATEGORIES -->
+    <section class="category-section" id="categories">
+        <div class="section-heading">
+            <div>
+                <span class="eyebrow">BROWSE YOUR WAY</span>
+                <h2>Shop by category</h2>
+            </div>
+
+            <a class="subtle-link" href="#products">
+                View products →
+            </a>
+        </div>
+
+        <div class="category-chips">
+            <a class="category-chip {% if not selected_category %}selected{% endif %}"
+               href="{{ url_for('home', q=search, sort=sort) }}">
+                All products
+            </a>
+
+            {% for category in categories %}
+                <a class="category-chip {% if selected_category == category['category'] %}selected{% endif %}"
+                   href="{{ url_for('home', category=category['category'], q=search, sort=sort) }}">
+                    <span>{{ category['category'] }}</span>
+                    <small>{{ category['total'] }}</small>
+                </a>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- PRODUCTS -->
+    <section class="products-section" id="products">
+        <div class="section-heading">
+            <div>
+                <span class="eyebrow">HANDPICKED FOR YOU</span>
+
+                <h2>
+                    {% if selected_category %}
+                        {{ selected_category }}
+                    {% elif search %}
+                        Search results
+                    {% else %}
+                        Explore products
+                    {% endif %}
+                </h2>
+
+                <p class="results-count">
+                    {{ total_products }} product{% if total_products != 1 %}s{% endif %} to explore
+                </p>
+            </div>
+
+            <form class="sort-form"
+                  action="{{ url_for('home') }}"
+                  method="get">
+
+                {% if selected_category %}
+                    <input type="hidden"
+                           name="category"
+                           value="{{ selected_category }}">
+                {% endif %}
+
+                {% if search %}
+                    <input type="hidden" name="q" value="{{ search }}">
+                {% endif %}
+
+                <label for="sort">Sort by</label>
+
+                <select name="sort"
+                        id="sort"
+                        onchange="this.form.submit()">
+
+                    <option value="featured"
+                        {% if sort == 'featured' %}selected{% endif %}>
+                        Featured
+                    </option>
+
+                    <option value="price_low"
+                        {% if sort == 'price_low' %}selected{% endif %}>
+                        Price: low to high
+                    </option>
+
+                    <option value="price_high"
+                        {% if sort == 'price_high' %}selected{% endif %}>
+                        Price: high to low
+                    </option>
+
+                    <option value="name"
+                        {% if sort == 'name' %}selected{% endif %}>
+                        Name: A to Z
+                    </option>
+                </select>
+            </form>
+        </div>
+
+        {% if products %}
+            <div class="product-grid">
+                {% for product in products %}
+                    <article class="product-card">
+                        <div class="product-visual">
+                            <span class="product-emoji" aria-hidden="true">
+                                {% set c = product['category']|lower %}
+                                {% if 'elect' in c %}
+                                    🎧
+                                {% elif 'cloth' in c or 'fashion' in c %}
+                                    👕
+                                {% elif 'book' in c %}
+                                    📚
+                                {% elif 'home' in c or 'kitchen' in c %}
+                                    🏠
+                                {% elif 'beauty' in c or 'care' in c %}
+                                    ✨
+                                {% elif 'sport' in c or 'fitness' in c %}
+                                    ⚽
+                                {% elif 'toy' in c %}
+                                    🧸
+                                {% else %}
+                                    🛍️
+                                {% endif %}
+                            </span>
+
+                            <span class="product-tag">Marketplace pick</span>
+                        </div>
+
+                        <div class="product-info">
+                            <span class="product-category">
+                                {{ product['category'] }}
+                            </span>
+
+                            <h3>{{ product['name'] }}</h3>
+
+                            <div class="product-meta">
+                                <span class="product-price">
+                                    ₹{{ "{:,.0f}".format(product['price']) }}
+                                </span>
+
+                                {% if product['stock'] > 0 %}
+                                    <span class="stock-status">In stock</span>
+                                {% else %}
+                                    <span class="stock-status out-of-stock">
+                                        Out of stock
+                                    </span>
+                                {% endif %}
+                            </div>
+
+                            <button class="add-to-cart-btn"
+                                    data-product-id="{{ product['id'] }}"
+                                    type="button"
+                                    {% if product['stock'] <= 0 %}disabled{% endif %}>
+                                ＋ Add to cart
+                            </button>
+                        </div>
+                    </article>
+                {% endfor %}
+            </div>
+
+        {% else %}
+            <div class="no-products">
+                <div>🔎</div>
+                <h3>No products found</h3>
+                <p>Try another search or choose a different category.</p>
+                <a class="hero-button" href="{{ url_for('home') }}">
+                    Clear filters
+                </a>
+            </div>
+        {% endif %}
+
+        <!-- PAGINATION -->
+        {% if total_pages > 1 %}
+            <nav class="pagination" aria-label="Product pages">
+                {% if page > 1 %}
+                    <a href="{{ url_for('home', category=selected_category, q=search, sort=sort, page=page-1) }}">
+                        ← Previous
+                    </a>
+                {% endif %}
+
+                <span>
+                    Page <strong>{{ page }}</strong> of {{ total_pages }}
+                </span>
+
+                {% if page < total_pages %}
+                    <a href="{{ url_for('home', category=selected_category, q=search, sort=sort, page=page+1) }}">
+                        Next →
+                    </a>
+                {% endif %}
+            </nav>
+        {% endif %}
+    </section>
+</main>
+
+<!-- FOOTER -->
+<footer class="site-footer">
+    <a class="footer-brand" href="{{ url_for('home') }}">
+        Marketplace<span>.</span>
+    </a>
+
+    <p>Your everyday finds, all in one place.</p>
+    <small>© 2026 Marketplace. Built for easy shopping.</small>
+</footer>
+
+<div id="toast-container"
+     class="toast-container"
+     aria-live="polite"
+     aria-atomic="true"></div>
+
+<script src="{{ url_for('static', filename='script.js') }}" defer></script>
+</body>
+</html>

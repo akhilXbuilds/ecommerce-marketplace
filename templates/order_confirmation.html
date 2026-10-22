@@ -1,0 +1,46 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Confirmed | Marketplace</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<header>
+    <h1>Marketplace</h1>
+    <nav><a href="/">Home</a></nav>
+</header>
+
+<main class="auth-page">
+    <section class="auth-card order-success">
+        <div class="success-icon">✓</div>
+        <h2>Order Placed Successfully!</h2>
+        <p>Thanks for shopping with Marketplace.</p>
+        <p><strong>Order number:</strong> #{{ order.id }}</p>
+        <p><strong>Status:</strong> {{ order.status }}</p>
+
+        <hr>
+
+        {% for item in items %}
+            <div class="summary-row">
+                <span>{{ item.product_name }} × {{ item.quantity }}</span>
+                <strong>₹{{ "{:,}".format(item.subtotal) }}</strong>
+            </div>
+        {% endfor %}
+
+        <div class="summary-row total-row">
+            <strong>Order Total</strong>
+            <strong>₹{{ "{:,}".format(order.total) }}</strong>
+        </div>
+
+        <p><strong>Delivering to:</strong><br>
+            {{ order.address }}, {{ order.city }} - {{ order.postal_code }}
+        </p>
+
+        <a href="/" class="auth-submit continue-shopping">Continue Shopping</a>
+    </section>
+</main>
+</body>
+</html>

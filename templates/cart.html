@@ -1,0 +1,213 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Cart | Marketplace</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='cart.css') }}">
+</head>
+<body>
+
+<header class="site-header">
+    <a class="brand" href="{{ url_for('home') }}">
+        Marketplace<span>.</span>
+    </a>
+
+    <nav class="nav-links" aria-label="Main navigation">
+        <a class="nav-link" href="{{ url_for('home') }}">Home</a>
+        <a class="nav-link" href="{{ url_for('home') }}#categories">
+            Categories
+        </a>
+        <a class="nav-link" href="{{ url_for('home') }}#products">
+            Products
+        </a>
+    </nav>
+
+    <div class="nav-actions">
+        <a class="cart-link" href="{{ url_for('cart') }}">
+            <span aria-hidden="true">🛒</span>
+            Cart
+            <span class="cart-count" id="cart-count">{{ item_count }}</span>
+        </a>
+    </div>
+</header>
+
+<main class="cart-page">
+
+    <div class="cart-heading">
+        <div>
+            <h1>🛒 Your Shopping Cart</h1>
+            <p>Review your items before checkout.</p>
+        </div>
+
+        <a class="continue-link" href="{{ url_for('home') }}">
+            ← Continue Shopping
+        </a>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="cart-notification show {{ category }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    {% if items %}
+
+        <div class="cart-layout">
+
+            <!-- CART PRODUCTS -->
+            <section class="cart-items" aria-label="Cart products">
+
+                {% for item in items %}
+                    <article class="cart-item" data-cart-item>
+
+                        <div class="cart-product-icon" aria-hidden="true">
+                            {% set c = item.category|lower %}
+                            {% if 'grocer' in c %}
+                                🛍️
+                            {% elif 'fruit' in c %}
+                                🍎
+                            {% elif 'vegetable' in c %}
+                                🥦
+                            {% elif 'electronic' in c %}
+                                🎧
+                            {% elif 'cloth' in c %}
+                                👕
+                            {% elif 'book' in c %}
+                                📚
+                            {% elif 'furniture' in c %}
+                                🪑
+                            {% else %}
+                                📦
+                            {% endif %}
+                        </div>
+
+                        <div class="cart-product-info">
+                            <h3>{{ item.name }}</h3>
+
+                            <p class="cart-unit-price">
+                                ₹{{ "{:,.0f}".format(item.price) }} each
+                            </p>
+
+                            <div class="quantity-control">
+                                <button
+                                    class="quantity-btn decrease-btn"
+                                    data-product-id="{{ item.id }}"
+                                    type="button"
+                                    aria-label="Decrease quantity">
+                                    −
+                                </button>
+
+                                <span class="quantity-value">
+                                    {{ item.quantity }}
+                                </span>
+
+                                <button
+                                    class="quantity-btn increase-btn"
+                                    data-product-id="{{ item.id }}"
+                                    type="button"
+                                    aria-label="Increase quantity"
+                                    {% if item.quantity >= item.stock %}disabled{% endif %}>
+                                    +
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="cart-product-right">
+                            <strong class="cart-subtotal">
+                                ₹{{ "{:,.0f}".format(item.subtotal) }}
+                            </strong>
+
+                            <button
+                                class="remove-from-cart-btn"
+                                data-product-id="{{ item.id }}"
+                                type="button">
+                                Remove
+                            </button>
+                        </div>
+
+                    </article>
+                {% endfor %}
+
+            </section>
+
+            <!-- ORDER SUMMARY -->
+            <aside class="cart-summary">
+                <h2>Order Summary</h2>
+
+                <div class="summary-row">
+                    <span>Distinct products</span>
+                    <strong>{{ items|length }}</strong>
+                </div>
+
+                <div class="summary-row">
+                    <span>Items in cart</span>
+                    <strong id="summary-item-count">{{ item_count }}</strong>
+                </div>
+
+                <div class="summary-row total-row">
+                    <span>Total</span>
+                    <strong id="cart-total">
+                        ₹{{ "{:,.0f}".format(total) }}
+                    </strong>
+                </div>
+
+                <a href="{{ url_for('checkout') }}"
+                   class="checkout-btn">
+                    Proceed to Checkout →
+                </a>
+
+                <p class="secure-note">
+                    🔒 Your items are waiting for you.
+                </p>
+            </aside>
+
+        </div>
+
+    {% else %}
+
+        <!-- EMPTY CART -->
+        <section class="empty-cart">
+            <div class="empty-cart-icon">🛍️</div>
+
+            <h2>Your cart is empty!</h2>
+
+            <p>You haven't added any products yet.</p>
+
+            <a href="{{ url_for('home') }}" class="primary-btn">
+                Start Shopping
+            </a>
+        </section>
+
+    {% endif %}
+
+</main>
+
+<footer class="site-footer">
+    <a class="footer-brand" href="{{ url_for('home') }}">
+        Marketplace<span>.</span>
+    </a>
+
+    <p>Your everyday finds, all in one place.</p>
+    <small>© 2026 Marketplace. Built for easy shopping.</small>
+</footer>
+
+<div id="toast-container"
+     class="toast-container"
+     aria-live="polite"
+     aria-atomic="true"></div>
+
+<script src="{{ url_for('static', filename='script.js') }}" defer></script>
+
+</body>
+</html>

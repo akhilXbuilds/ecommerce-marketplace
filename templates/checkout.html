@@ -1,0 +1,263 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout | Marketplace</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='cart.css') }}">
+</head>
+<body>
+
+<!-- NAVBAR -->
+<header class="site-header">
+    <a class="brand" href="{{ url_for('home') }}">
+        Marketplace<span>.</span>
+    </a>
+
+    <nav class="nav-links">
+        <a class="nav-link" href="{{ url_for('home') }}">Home</a>
+        <a class="nav-link" href="{{ url_for('home') }}#categories">Categories</a>
+        <a class="nav-link" href="{{ url_for('home') }}#products">Products</a>
+    </nav>
+
+    <div class="nav-actions">
+        <a class="cart-link" href="{{ url_for('cart') }}">
+            🛒 Modify Cart
+            <span class="cart-count" id="cart-count">
+                {{ session.get('cart', {}).values() | sum }}
+            </span>
+        </a>
+    </div>
+</header>
+
+<main class="checkout-page">
+
+    <!-- PAGE HEADING -->
+    <div class="checkout-heading">
+        <span class="eyebrow">SECURE CHECKOUT</span>
+        <h1>Complete Your Order 💙</h1>
+        <p>Enter your delivery details first, then review your order below.</p>
+    </div>
+
+    <!-- FLASH MESSAGES -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="flash-message {{ category }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    {% if products %}
+
+    <!-- ONE FORM FOR DELIVERY DETAILS AND FINAL ORDER SUBMISSION -->
+    <form method="POST"
+          action="{{ url_for('checkout') }}"
+          class="checkout-form checkout-form-full">
+
+        <!-- STEP 1: DELIVERY DETAILS -->
+        <section class="checkout-card delivery-section">
+
+            <div class="checkout-step-heading">
+                <span class="step-number">1</span>
+                <div>
+                    <h2>Delivery Details</h2>
+                    <p>Where should we deliver your order?</p>
+                </div>
+            </div>
+
+            <div class="delivery-fields">
+
+                <div class="form-group">
+                    <label for="name">Full Name</label>
+                    <input
+                        type="text"
+                        id="name"
+                        name="name"
+                        placeholder="Enter your full name"
+                        autocomplete="name"
+                        required>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        placeholder="Enter your email address"
+                        autocomplete="email"
+                        required>
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="address">Street Address</label>
+                    <textarea
+                        id="address"
+                        name="address"
+                        placeholder="House number, street, area"
+                        autocomplete="street-address"
+                        required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="city">City</label>
+                    <input
+                        type="text"
+                        id="city"
+                        name="city"
+                        placeholder="Enter your city"
+                        autocomplete="address-level2"
+                        required>
+                </div>
+
+                <div class="form-group">
+                    <label for="postal_code">Postal Code</label>
+                    <input
+                        type="text"
+                        id="postal_code"
+                        name="postal_code"
+                        placeholder="Enter postal code"
+                        autocomplete="postal-code"
+                        required>
+                </div>
+
+            </div>
+
+            <p class="checkout-form-hint">
+                ✓ Your delivery information will be used to process this order.
+            </p>
+        </section>
+
+        <!-- STEP 2: ORDER SUMMARY -->
+        <section class="checkout-card order-review-section">
+
+            <div class="checkout-step-heading">
+                <span class="step-number">2</span>
+                <div>
+                    <h2>Review Your Order</h2>
+                    <p>Check your products and quantities before placing the order.</p>
+                </div>
+            </div>
+
+            <!-- PRODUCT LIST -->
+            <div class="review-products">
+
+                {% for item in products %}
+                    <article class="review-product">
+
+                        <div class="review-product-icon">
+                            📦
+                        </div>
+
+                        <div class="review-product-info">
+                            <h3>{{ item.name }}</h3>
+                            <p>₹{{ "{:,.2f}".format(item.price) }} each</p>
+                            <span>Quantity: {{ item.quantity }}</span>
+                        </div>
+
+                        <strong class="review-product-subtotal">
+                            ₹{{ "{:,.2f}".format(item.subtotal) }}
+                        </strong>
+
+                    </article>
+                {% endfor %}
+
+            </div>
+
+            <!-- PRICE DETAILS AT THE BOTTOM -->
+            <div class="checkout-price-details">
+
+                <h3>Price Details</h3>
+
+                <div class="checkout-price-row">
+                    <span>Product types</span>
+                    <span>{{ products|length }}</span>
+                </div>
+
+                <div class="checkout-price-row">
+                    <span>Total units</span>
+                    <span>{{ products | sum(attribute='quantity') }}</span>
+                </div>
+
+                <div class="checkout-price-row">
+                    <span>Price of items</span>
+                    <span>₹{{ "{:,.2f}".format(total) }}</span>
+                </div>
+
+                <div class="checkout-price-row">
+                    <span>Delivery Charges</span>
+                    <strong class="free-delivery">FREE</strong>
+                </div>
+
+                <div class="checkout-price-row">
+                    <span>Platform Fee</span>
+                    <span>₹0.00</span>
+                </div>
+
+                <div class="checkout-grand-total">
+                    <span>Grand Total</span>
+                    <strong>₹{{ "{:,.2f}".format(total) }}</strong>
+                </div>
+
+                <p class="checkout-savings">
+                    ✓ Free delivery on this order!
+                </p>
+
+            </div>
+
+            <!-- FINAL ACTIONS -->
+            <div class="checkout-final-actions">
+
+                <a href="{{ url_for('cart') }}"
+                   class="modify-cart-button">
+                    ← Modify Cart
+                </a>
+
+                <button type="submit" class="place-order-button">
+                    Place Order · ₹{{ "{:,.2f}".format(total) }}
+                </button>
+
+            </div>
+
+            <p class="checkout-demo-note">
+                🔒 Demo checkout — no online payment is collected.
+            </p>
+
+        </section>
+
+    </form>
+
+    {% else %}
+
+        <section class="checkout-card checkout-empty">
+            <div>🛍️</div>
+            <h2>Your cart is empty</h2>
+            <p>Add some products before proceeding to checkout.</p>
+            <a href="{{ url_for('home') }}" class="place-order-button">
+                Start Shopping
+            </a>
+        </section>
+
+    {% endif %}
+
+</main>
+
+<footer class="site-footer">
+    <a class="footer-brand" href="{{ url_for('home') }}">
+        Marketplace<span>.</span>
+    </a>
+    <p>Your everyday finds, all in one place.</p>
+    <small>© 2026 Marketplace. Built for easy shopping.</small>
+</footer>
+
+</body>
+</html>
