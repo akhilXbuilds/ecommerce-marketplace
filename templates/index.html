@@ -39,26 +39,28 @@
         <button type="submit">Search</button>
     </form>
 
-    <div class="nav-actions">
-        {% if session.get('user_id') %}
-            <a class="account-link" href="{{ url_for('home') }}">
-                My account
-            </a>
-        {% else %}
-            <a class="account-link" href="{{ url_for('login') }}">
-                Sign in
-            </a>
-        {% endif %}
 
-        <a class="cart-link" href="{{ url_for('cart') }}">
-            <span aria-hidden="true">🛒</span>
-            Cart
-            <span class="cart-count" id="cart-count">
-                {{ session.get('cart', {}).values() | sum }}
-            </span>
+<div class="nav-actions">
+    {% if session.get('user_id') %}
+        <a class="account-link" href="{{ url_for('dashboard') }}">
+            My account
         </a>
-    </div>
+    {% else %}
+        <a class="account-link" href="{{ url_for('login') }}">
+            Sign in
+        </a>
+    {% endif %}
+
+    <a class="cart-link" href="{{ url_for('cart') }}">
+        <span aria-hidden="true">🛒</span>
+        Cart
+        <span class="cart-count" id="cart-count">
+            {{ session.get('cart', {}).values() | sum }}
+        </span>
+    </a>
+</div>
 </header>
+
 
 {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
@@ -259,7 +261,7 @@
                                 {% elif 'book' in c %}
                                     📚
                                 {% elif 'home' in c or 'kitchen' in c %}
-                                    🏠
+                                    �
                                 {% elif 'beauty' in c or 'care' in c %}
                                     ✨
                                 {% elif 'sport' in c or 'fitness' in c %}

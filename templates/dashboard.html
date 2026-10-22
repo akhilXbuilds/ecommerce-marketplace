@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>My Account | Marketplace</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: Arial, sans-serif; color: #111b3b; background: #f3f6ff; }
+    header { background: #14254d; color: white; padding: 18px 6%; display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
+    header a { color: white; text-decoration: none; margin-left: 16px; }
+    main { max-width: 1000px; margin: 36px auto; padding: 0 18px; }
+    .card { background: white; border-radius: 16px; padding: 24px; margin-bottom: 22px; box-shadow: 0 8px 28px #14254d12; }
+    h1 { margin-top: 0; } .muted { color: #66718d; }
+    .actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 18px; }
+    .btn { display: inline-block; background: #244783; color: white; text-decoration: none; border: 0; border-radius: 9px; padding: 11px 16px; cursor: pointer; font-weight: 700; }
+    .btn.secondary { background: #e8eefb; color: #18345f; }
+    .order { border: 1px solid #e1e7f3; border-radius: 10px; padding: 16px; margin-top: 12px; display: flex; justify-content: space-between; gap: 14px; flex-wrap: wrap; }
+    .status { display: inline-block; background: #e4f6e9; color: #21633b; padding: 5px 9px; border-radius: 20px; font-size: 13px; }
+    .flash { padding: 12px 16px; margin-bottom: 12px; border-radius: 8px; background: #fff4d7; }
+    @media (max-width: 600px) { header { align-items: flex-start; } header a { margin-left: 0; margin-right: 12px; } }
+  </style>
+</head>
+<body>
+  <header>
+    <strong>Marketplace.</strong>
+    <nav>
+      <a href="{{ url_for('home') }}">Home</a>
+      <a href="{{ url_for('cart') }}">Cart</a>
+      <a href="{{ url_for('dashboard') }}">My account</a>
+      <form action="{{ url_for('logout') }}" method="post" style="display:inline">
+        <button class="btn" type="submit">Log out</button>
+      </form>
+    </nav>
+  </header>
+  <main>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, message in messages %}<div class="flash">{{ message }}</div>{% endfor %}
+    {% endwith %}
+    <section class="card">
+      <h1>My Account</h1>
+      <p class="muted">Welcome back, {{ user['name'] }}!</p>
+      <p><strong>Name:</strong> {{ user['name'] }}</p>
+      <p><strong>Email:</strong> {{ user['email'] }}</p>
+      <div class="actions"><a class="btn" href="{{ url_for('home') }}">Continue shopping</a><a class="btn secondary" href="{{ url_for('cart') }}">View cart</a></div>
+    </section>
+    <section class="card">
+      <h2>My Orders</h2>
+      {% if orders %}
+        {% for order in orders %}
+          <div class="order">
+            <div><strong>Order #{{ order['id'] }}</strong><p class="muted">Placed: {{ order['created_at'] }}</p></div>
+            <div><strong>₹{{ '%.2f'|format(order['total']) }}</strong><p><span class="status">{{ order['status'] }}</span></p><a href="{{ url_for('order_confirmation', order_id=order['id']) }}">View order</a></div>
+          </div>
+        {% endfor %}
+      {% else %}
+        <p class="muted">You haven't placed any orders yet.</p>
+        <a class="btn" href="{{ url_for('home') }}">Explore products</a>
+      {% endif %}
+    </section>
+  </main>
+</body>
+</html>
